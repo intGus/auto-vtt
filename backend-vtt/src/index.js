@@ -1,15 +1,37 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
+// import { Ai } from '@cloudflare/ai'
+
+// export default {
+// 	async fetch(request, env, ctx) {
+//     const ai = new Ai(env.AI)
+
+//     const answer = await ai.run(
+//       '@cf/meta/llama-2-7b-chat-int8',
+//       {
+//         messages: [
+//           { role: 'user', content: `tell me a joke about cloudflare?` }
+//         ]
+//       }
+//     )
+
+//     return new Response(JSON.stringify(answer))
+// 	}
+// }
+
+import { Ai } from '@cloudflare/ai';
 
 export default {
-	async fetch(request, env, ctx) {
-		return new Response('Hello World!');
-	},
+  async fetch(request, env) {
+    const audioResponse = await fetch(
+      'https://github.com/intGus/auto-vtt/raw/main/Untitled.mp3'
+    );
+    const blob = await audioResponse.arrayBuffer();
+
+    const ai = new Ai(env.AI);
+    const inputs = {
+      audio: [...new Uint8Array(blob)]
+    };
+    const response = await ai.run('@cf/openai/whisper', inputs);
+
+    return Response.json({ inputs, response });
+  }
 };
